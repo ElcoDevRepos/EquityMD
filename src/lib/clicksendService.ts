@@ -30,17 +30,18 @@ interface ClickSendResponse {
   data?: any;
 }
 
+
 class ClickSendService {
   private config: ClickSendConfig;
   private contactListId: number;
 
   constructor() {
     this.config = {
-      username: process.env.CLICKSEND_USERNAME || '',
-      apiKey: process.env.CLICKSEND_API_KEY || '',
+      username: import.meta.env.CLICKSEND_USERNAME || '',
+      apiKey: import.meta.env.CLICKSEND_API_KEY || '',
       baseUrl: 'https://rest.clicksend.com/v3'
     };
-    this.contactListId = parseInt(process.env.CLICKSEND_CONTACT_LIST_ID || '0');
+    this.contactListId = parseInt(import.meta.env.CLICKSEND_CONTACT_LIST_ID || '0');
   }
 
   private getAuthHeader(): string {
@@ -50,7 +51,7 @@ class ClickSendService {
 
   private async makeRequest(endpoint: string, method: string = 'GET', data?: any): Promise<ClickSendResponse> {
     const url = `${this.config.baseUrl}${endpoint}`;
-    
+
     const options: RequestInit = {
       method,
       headers: {
@@ -66,7 +67,7 @@ class ClickSendService {
     try {
       const response = await fetch(url, options);
       const result = await response.json();
-      
+
       return {
         http_code: response.status,
         response_code: result.response_code || 'SUCCESS',
@@ -128,7 +129,7 @@ class ClickSendService {
     // First, find the contact by phone number
     const contacts = await this.getContacts();
     const contact = contacts.data?.data?.find((c: any) => c.phone_number === phoneNumber);
-    
+
     if (!contact) {
       return {
         http_code: 404,
@@ -148,7 +149,7 @@ class ClickSendService {
   // Send SMS to entire contact list
   async sendToContactList(message: string, listId?: number): Promise<ClickSendResponse> {
     const targetListId = listId || this.contactListId;
-    
+
     const smsData = {
       list_id: targetListId,
       body: message,
@@ -180,17 +181,17 @@ class ClickSendService {
   static formatPhoneNumber(phoneNumber: string): string {
     // Remove all non-digits
     const digits = phoneNumber.replace(/\D/g, '');
-    
+
     // If it starts with 1, assume US number
     if (digits.length === 11 && digits.startsWith('1')) {
       return `+${digits}`;
     }
-    
+
     // If 10 digits, add US country code
     if (digits.length === 10) {
       return `+1${digits}`;
     }
-    
+
     return phoneNumber; // Return as-is if can't format
   }
 
@@ -199,7 +200,7 @@ class ClickSendService {
     const messageLength = message.length;
     const smsCount = Math.ceil(messageLength / 160); // SMS is 160 chars max
     const costPerSMS = 0.05; // $0.05 per SMS (approximate ClickSend pricing)
-    
+
     return smsCount * recipientCount * costPerSMS;
   }
 }
@@ -211,4 +212,4 @@ export const clickSendService = new ClickSendService();
 export type { SMSMessage, ContactListContact, ClickSendResponse };
 
 // Export utility functions
-export const { validatePhoneNumber, formatPhoneNumber, calculateSMSCost } = ClickSendService; 
+export const { validatePhoneNumber, formatPhoneNumber, calculateSMSCost } = ClickSendService;
