@@ -59,7 +59,7 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
   const [formData, setFormData] = useState({
     fullName: profile?.full_name || '',
     avatarUrl: profile?.avatar_url || '',
-    phoneNumber: '',
+    phoneNumber: profile?.phone_number || '',
     bio: '',
     investmentRange: '',
     location: '',
@@ -109,7 +109,7 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
           experienceLevel: data.investment_preferences?.experience_level || '',
           yearsInvesting: data.investment_preferences?.years_investing || '',
           bio: data.investment_preferences?.bio || '',
-          phoneNumber: data.investment_preferences?.phone_number || '',
+          phoneNumber: profile?.phone_number || '',
           state: data.investment_preferences?.state || '',
         }));
       }
@@ -139,14 +139,15 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
           avatar_url: formData.avatarUrl,
           email_notifications: emailPreferences,
           updated_at: new Date().toISOString(),
+          phone_number: formData.phoneNumber,
         })
         .eq('id', user.id);
 
       if (profileError) throw profileError;
 
       // Parse investment range correctly (handle comma-formatted numbers)
-      const investmentRangeValue = formData.investmentRange 
-        ? parseFormattedNumber(formData.investmentRange) 
+      const investmentRangeValue = formData.investmentRange
+        ? parseFormattedNumber(formData.investmentRange)
         : null;
 
       // Update investor profile
@@ -161,7 +162,6 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
             experience_level: formData.experienceLevel,
             years_investing: formData.yearsInvesting,
             bio: formData.bio,
-            phone_number: formData.phoneNumber,
             state: formData.state
           },
           updated_at: new Date().toISOString(),
@@ -171,7 +171,7 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
       if (investorError) throw investorError;
 
       setMessage('Profile updated successfully!');
-      
+
       // Refresh the investor profile to show the updated values
       await fetchInvestorProfile();
     } catch (error) {
@@ -188,7 +188,7 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
         return (
           <div className="space-y-6">
             <h2 className="text-xl font-semibold">Basic Information</h2>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Profile Picture
@@ -388,8 +388,8 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
               </label>
               <LocationAutocomplete
                 value={formData.preferredLocations}
-                onChange={(locations) => setFormData(prev => ({ 
-                  ...prev, 
+                onChange={(locations) => setFormData(prev => ({
+                  ...prev,
                   preferredLocations: locations
                 }))}
                 placeholder="Start typing a state name (e.g., Texas, California, Florida)"
@@ -516,7 +516,7 @@ export function InvestorProfileForm({ setMessage }: InvestorProfileFormProps) {
             Previous
           </button>
         )}
-        
+
         {currentStep < 3 ? (
           <button
             type="button"
